@@ -1,0 +1,32 @@
+# 서버 설정
+server:
+  port: 8080
+# 스프링 기본 설정
+spring:
+  application:
+    name: ticketing
+  # 데이터베이스 연결 설정
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 서버 타임존을 Asia/Seoul로 맞춤
+    url: jdbc:mysql://localhost:3306/ticketing_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  # JPA 설정
+  jpa:
+    hibernate:
+      # 변경사항만 반영
+      ddl-auto: update # 개발
+    # SQL 로그 출력
+    show-sql: true
+    properties:
+      hibernate:
+        highlight_sql: true # SQL 키워드 하이라이트 표시
+        format_sql: true # SQL 쿼리를 읽기 쉽게 표시
+        default_batch_fetch_size: 100 # 지연로딩으로 발생해야하는 쿼리를 IN절로 모아내보내는 기능
+  # 강제 인코딩 설정
+  mandatory-file-encoding: UTF-8
+logging:
+  level:
+    # 개발 시 상세정보
+    com.example.ticketing: DEBUG
