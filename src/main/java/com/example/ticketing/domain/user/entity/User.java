@@ -16,8 +16,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본 키 값 자동으로 생성
     private Long userId;
 
-    @Column(unique = true, nullable = false, length = 50)
-    private String id;
+    @Column(unique = true, nullable = false, length = 50, name = "id")
+    private String loginId;
 
     @Column(nullable = false, length = 255)
     private String pw;
@@ -29,8 +29,8 @@ public class User {
     private String email;
 
     @Builder
-    public User(String id, String pw, String userName, String email) {
-        this.id = id;
+    public User(String loginId, String pw, String userName, String email) {
+        this.loginId = loginId;
         this.pw = pw;
         this.userName = userName;
         this.email = email;
