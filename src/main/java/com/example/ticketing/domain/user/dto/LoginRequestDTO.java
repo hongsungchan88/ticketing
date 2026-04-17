@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class LoginRequestDTO {
+public class LoginRequestDTO { // 로그인용
     @NotBlank(message = "ID를 입력해주세요.")
     private String loginId;
 

@@ -10,6 +10,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // ID 찾기
     // Optional<T> : NPE 방지, NPE : Null Pointer Exception
     Optional<User> findByLoginId(String loginId);
+
     // ID 중복 검사
     boolean existsByLoginId(@Nonnull String id);
 }
