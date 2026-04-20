@@ -18,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/users/signup") // 회원가입
-    public ResponseEntity<Void> singUp(@RequestBody @Valid SignUpRequestDTO requestDTO) {
+    public ResponseEntity<Void> signUp(@RequestBody @Valid SignUpRequestDTO requestDTO) {
         log.info("회원가입 요청 ID: " + requestDTO.getLoginId());
         userService.signUp(requestDTO);
         log.info("회원가입 성공");
@@ -32,4 +32,8 @@ public class UserController {
         log.info("로그인 성공");
         return ResponseEntity.ok(userId);
     }
+
+    // update
+
+    // delete
 }

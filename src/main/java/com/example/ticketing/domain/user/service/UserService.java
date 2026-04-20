@@ -28,7 +28,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true) // 읽기 전용
     public Long login(LoginRequestDTO requestDTO) {
         User user = userRepository.findByLoginId(requestDTO.getLoginId())
                 // Optional Type 예외 처리 방법
