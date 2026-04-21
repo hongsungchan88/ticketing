@@ -10,11 +10,12 @@ public class UserResponseDTO {
     private String userName;
     private String email;
 
-    // 필요한 데이터만 전송하기 위해 DTO 클래스에서 생성자를 사용해 엔티티를 DTO로 변환하는 방식 사용
-    public UserResponseDTO(User user) {
-        this.userId = user.getUserId();
-        this.loginId = user.getLoginId();
-        this.userName = user.getUserName();
-        this.email = user.getEmail();
+    public static UserResponseDTO from(User user) {
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.userId = user.getUserId();
+        dto.loginId = user.getLoginId();
+        dto.userName = user.getUserName();
+        dto.email = user.getEmail();
+        return dto;
     }
 }

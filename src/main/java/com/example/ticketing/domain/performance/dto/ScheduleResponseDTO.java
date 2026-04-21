@@ -17,13 +17,15 @@ public class ScheduleResponseDTO {
     private Long perfId;
     private String perfName;
 
-    public ScheduleResponseDTO(Schedule sched) {
-        this.schedId = sched.getSchedId();
-        this.perfDate = sched.getPerfDate();
-        this.startTime = sched.getStartTime();
-        this.endTime = sched.getEndTime();
+    public static ScheduleResponseDTO from(Schedule sched) {
+        ScheduleResponseDTO dto = new ScheduleResponseDTO();
+        dto.schedId = sched.getSchedId();
+        dto.perfDate = sched.getPerfDate();
+        dto.startTime = sched.getStartTime();
+        dto.endTime = sched.getEndTime();
 
-        this.perfId = sched.getPerf().getPerfId();
-        this.perfName = sched.getPerf().getPerfName();
+        dto.perfId = sched.getPerf().getPerfId();
+        dto.perfName = sched.getPerf().getPerfName();
+        return dto;
     }
 }

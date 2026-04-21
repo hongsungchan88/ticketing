@@ -25,7 +25,7 @@ public class PerformanceService {
         // DB에 담긴 전체 공연 목록을 가져와서 DTO로 변환
         List<Performance> perfList = performanceRepository.findAll();
         return perfList.stream()
-                .map(PerformanceResponseDTO::new)
+                .map(PerformanceResponseDTO::from)
                 .toList();
     }
 
@@ -34,7 +34,7 @@ public class PerformanceService {
         // 특정 공연 id와 일치하는 일정을 가져오기
         List<Schedule> schedList = scheduleRepository.findAllByPerf_PerfId(perfId);
         return schedList.stream()
-                .map(ScheduleResponseDTO::new)
+                .map(ScheduleResponseDTO::from)
                 .toList();
     }
 }

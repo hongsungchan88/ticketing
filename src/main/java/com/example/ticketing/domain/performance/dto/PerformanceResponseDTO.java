@@ -10,10 +10,12 @@ public class PerformanceResponseDTO {
     private String venue;
     private Integer duration;
 
-    public PerformanceResponseDTO(Performance perf) {
-        this.perfId = perf.getPerfId();
-        this.perfName = perf.getPerfName();
-        this.venue = perf.getVenue();
-        this.duration = perf.getDuration();
+    public static PerformanceResponseDTO from(Performance perf) {
+        PerformanceResponseDTO dto = new PerformanceResponseDTO();
+        dto.perfId = perf.getPerfId();
+        dto.perfName = perf.getPerfName();
+        dto.venue = perf.getVenue();
+        dto.duration = perf.getDuration();
+        return dto;
     }
 }
