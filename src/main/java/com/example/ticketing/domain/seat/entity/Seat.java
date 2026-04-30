@@ -46,4 +46,12 @@ public class Seat {
         this.seatStatus = seatStatus;
         this.schedule = schedule;
     }
+
+    // 좌석 상태 변경
+    public void holdSet() {
+        if (!this.seatStatus.equals("AVAILABLE")) {
+            throw new IllegalStateException("이미 선점되거나 예매된 자석입니다.");
+        }
+        this.seatStatus = "HELD";
+    }
 }

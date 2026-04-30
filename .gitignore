@@ -1,11 +1,21 @@
+# --- Project Specific ---
 HELP.md
-.gradle
+.gradle/
 build/
+bin/
+out/
+.env
+
+# --- 빌드 결과물 중 예외적으로 유지할 파일 (Wrapper 등) ---
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+!**/src/main/**/out/
+!**/src/test/**/out/
 
-### STS ###
+# --- STS (Eclipse) ---
 .apt_generated
 .classpath
 .factorypath
@@ -13,27 +23,19 @@ build/
 .settings
 .springBeans
 .sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
 
-### IntelliJ IDEA ###
-.idea
+# --- IntelliJ IDEA ---
+.idea/
 *.iws
 *.iml
 *.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
-### NetBeans ###
+# --- NetBeans ---
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
+# --- VS Code ---
 .vscode/
-
-.env
