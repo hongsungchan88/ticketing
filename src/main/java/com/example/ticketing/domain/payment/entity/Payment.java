@@ -28,12 +28,12 @@ public class Payment {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
-    private Booking booking;
+    private Booking book;
 
     @Builder
-    public Payment(String payStatus, LocalDateTime payAt, Booking booking) {
+    public Payment(String payStatus, LocalDateTime payAt, Booking book) {
         this.payStatus = payStatus;
         this.payAt = payAt;
-        this.booking = booking;
+        this.book = book;
     }
 }

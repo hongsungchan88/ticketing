@@ -46,4 +46,16 @@ public class Booking {
         this.user = user;
         this.seat = seat;
     }
+
+    public void confirmBooking() {
+        if (!this.bookStatus.equals("INITIATED")) {
+            throw new IllegalStateException("결제 대기 중인 예매 건이 아닙니다.");
+        }
+        this.bookStatus = "CONFIRMED";
+    }
+
+    public void cancelBooking() {
+        this.bookStatus = "CANCELLED";
+        this.canceledAt = LocalDateTime.now();
+    }
 }

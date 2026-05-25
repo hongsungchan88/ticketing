@@ -54,4 +54,15 @@ public class Seat {
         }
         this.seatStatus = "HELD";
     }
+
+    public void reserveSeat() {
+        if (!this.seatStatus.equals("HELD")) {
+            throw new IllegalStateException("결제 대기 중인 좌석이 아닙니다.");
+        }
+        this.seatStatus = "RESERVED";
+    }
+
+    public void releaseSeat() {
+        this.seatStatus = "AVAILABLE";
+    }
 }
