@@ -1,0 +1,36 @@
+package com.example.ticketing.global.config;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Date;
+
+@Component // 스프링 빈으로 등록하여 어디서든 주입받아 쓸 수 있게 합니다.
+public class JwtUtil {
+
+    // application.yml에 적어둔 비밀키를 가져옵니다.
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    // 토큰 만료 시간 설정 (예: 1시간 = 1000ms * 60초 * 60분)
+    private final long tokenValidTime = 1000L * 60 * 60;
+
+    // 💡 JWT 토큰 생성 메서드
+    public String createToken(Long userId, String loginId) {
+        // 비밀키를 암호화 알고리즘에 맞는 Key 객체로 변환
+        Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+
+        return Jwts.builder()
+                .setSubject(loginId) // 토큰의 주인(주제)
+                .claim("userId", userId) // 토큰에 담을 추가 정보 (예매할 때 편하도록 PK를 담아둡니다)
+                .setIssuedAt(new Date(System.currentTimeMillis())) // 발급 시간
+                .setExpiration(new Date(System.currentTimeMillis() + tokenValidTime)) // 만료 시간
+                .signWith(key, SignatureAlgorithm.HS256) // 비밀키를 사용해 HS256 알고리즘으로 서명(도장 쾅!)
+                .compact();
+    }
+}

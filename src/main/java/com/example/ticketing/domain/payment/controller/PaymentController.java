@@ -1,7 +1,6 @@
 package com.example.ticketing.domain.payment.controller;
 
 import com.example.ticketing.domain.payment.dto.PaymentRequestDTO;
-import com.example.ticketing.domain.payment.entity.Payment;
 import com.example.ticketing.domain.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
