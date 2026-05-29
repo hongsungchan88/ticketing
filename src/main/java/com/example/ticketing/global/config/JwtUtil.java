@@ -20,7 +20,7 @@ public class JwtUtil {
     // 토큰 만료 시간 설정 (예: 1시간 = 1000ms * 60초 * 60분)
     private final long tokenValidTime = 1000L * 60 * 60;
 
-    // 💡 JWT 토큰 생성 메서드
+    // JWT 토큰 생성 메서드
     public String createToken(Long userId, String loginId) {
         // 비밀키를 암호화 알고리즘에 맞는 Key 객체로 변환
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -32,5 +32,27 @@ public class JwtUtil {
                 .setExpiration(new Date(System.currentTimeMillis() + tokenValidTime)) // 만료 시간
                 .signWith(key, SignatureAlgorithm.HS256) // 비밀키를 사용해 HS256 알고리즘으로 서명(도장 쾅!)
                 .compact();
+    }
+
+    // 1. 토큰에서 로그인 ID 추출
+    public String getLoginId(String token) {
+        Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
+    // 2. 토큰이 위조되지 않았고, 만료되지 않았는지 정상 여부 확인
+    public boolean validateToken(String token) {
+        try {
+            Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

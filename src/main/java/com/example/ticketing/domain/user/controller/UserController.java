@@ -29,11 +29,11 @@ public class UserController {
     public ResponseEntity<String> login(@RequestBody @Valid LoginRequestDTO requestDTO) {
         log.info("로그인 시도한 ID: " + requestDTO.getLoginId());
 
-        // 💡 서비스에서 반환된 JWT 토큰을 받습니다.
+        // 서비스에서 반환된 JWT 토큰을 받습니다.
         String token = userService.login(requestDTO);
 
         log.info("로그인 성공 및 토큰 발급 완료");
-        // 💡 성공 시 토큰을 반환합니다.
+        // 성공 시 토큰을 반환합니다.
         return ResponseEntity.ok(token);
     }
 }

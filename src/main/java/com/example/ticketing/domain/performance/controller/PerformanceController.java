@@ -34,10 +34,4 @@ public class PerformanceController {
         List<ScheduleResponseDTO> response = performanceService.schedByPerfId(perfId);
         return ResponseEntity.ok(response);
     }
-
-    // create
-
-    // update
-
-    // delete
 }
