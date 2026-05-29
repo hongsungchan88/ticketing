@@ -17,8 +17,11 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    // 토큰 만료 시간 설정 (예: 1시간 = 1000ms * 60초 * 60분)
+    // 토큰 만료 시간 설정
     private final long tokenValidTime = 1000L * 60 * 60;
+
+    // 💡 1. Refresh Token 만료 시간 추가
+    private final long refreshTokenValidTime = 1000L * 60 * 60 * 24 * 7;
 
     // JWT 토큰 생성 메서드
     public String createToken(Long userId, String loginId) {
@@ -34,7 +37,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 1. 토큰에서 로그인 ID 추출
+    // 토큰에서 로그인 ID 추출
     public String getLoginId(String token) {
         Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         return Jwts.parserBuilder()
@@ -45,7 +48,7 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    // 2. 토큰이 위조되지 않았고, 만료되지 않았는지 정상 여부 확인
+    // 토큰이 위조되지 않았고, 만료되지 않았는지 정상 여부 확인
     public boolean validateToken(String token) {
         try {
             Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
@@ -54,5 +57,15 @@ public class JwtUtil {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    // 교환권에는 개인정보(loginId)를 담지 않고 순수하게 유효기간만 설정하여 발급합니다.
+    public String createRefreshToken() {
+        Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        return Jwts.builder()
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenValidTime))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 }

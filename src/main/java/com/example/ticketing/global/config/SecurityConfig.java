@@ -41,7 +41,8 @@ public class SecurityConfig {
                 // API 경로 별 접근 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         // 누구나 접근 가능
-                        .requestMatchers("/api/v1/users/signup", "/api/v1/users/login", "/api/v1/performances/**").permitAll()
+                        .requestMatchers("/api/v1/users/signup", "/api/v1/users/login",
+                                "/api/v1/performances/**", "/api/v1/users/refresh-token").permitAll()
                         // 반드시 인증을 거쳐야 접근 가능
                         .anyRequest().authenticated()
                 )

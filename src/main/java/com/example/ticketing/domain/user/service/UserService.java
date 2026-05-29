@@ -2,7 +2,10 @@ package com.example.ticketing.domain.user.service;
 
 import com.example.ticketing.domain.user.dto.LoginRequestDTO;
 import com.example.ticketing.domain.user.dto.SignUpRequestDTO;
+import com.example.ticketing.domain.user.dto.TokenResponseDTO;
+import com.example.ticketing.domain.user.entity.RefreshToken;
 import com.example.ticketing.domain.user.entity.User;
+import com.example.ticketing.domain.user.repository.RefreshTokenRepository;
 import com.example.ticketing.domain.user.repository.UserRepository;
 import com.example.ticketing.global.config.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public void signUp(SignUpRequestDTO requestDTO) {
@@ -35,18 +39,53 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional(readOnly = true)
-    // 💡 반환 타입을 Long(회원번호)에서 String(JWT 토큰)으로 변경
-    public String login(LoginRequestDTO requestDTO) {
+    @Transactional
+    public TokenResponseDTO login(LoginRequestDTO requestDTO) {
         User user = userRepository.findByLoginId(requestDTO.getLoginId())
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 ID입니다."));
 
-        // 💡 암호화된 비밀번호 일치 여부 확인 (평문 vs 암호화된 값 비교)
         if (!passwordEncoder.matches(requestDTO.getPw(), user.getPw())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 💡 3. 비밀번호가 맞다면 JwtUtil을 사용해 토큰을 생성하여 반환!
-        return jwtUtil.createToken(user.getUserId(), user.getLoginId());
+        // 1. 두 개의 토큰 생성
+        String accessToken = jwtUtil.createToken(user.getUserId(), user.getLoginId());
+        String refreshToken = jwtUtil.createRefreshToken();
+
+        // 2. Refresh Token을 DB에 저장하거나 업데이트
+        refreshTokenRepository.findByLoginId(user.getLoginId())
+                .ifPresentOrElse(
+                        token -> token.updateToken(refreshToken), // 이미 있으면 값만 업데이트
+                        () -> refreshTokenRepository.save(new RefreshToken(user.getLoginId(), refreshToken)) // 없으면 새로 생성
+                );
+
+        return new TokenResponseDTO(accessToken, refreshToken);
+    }
+
+    @Transactional
+    public void logout(String loginId) {
+        // DB에서 해당 사용자의 Refresh Token을 삭제하여 무효화합니다.
+        refreshTokenRepository.deleteByLoginId(loginId);
+    }
+
+    @Transactional(readOnly = true)
+    public TokenResponseDTO refreshToken(String refreshToken) {
+        // 1. 넘어온 Refresh Token이 정상인지 확인
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않거나 만료된 Refresh Token입니다. 다시 로그인해주세요.");
+        }
+
+        // 2. DB에 저장된 토큰인지 확인 (탈취당한 토큰 방어)
+        RefreshToken savedToken = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Refresh Token입니다."));
+
+        // 3. 사용자를 찾아 새로운 Access Token 발급
+        User user = userRepository.findByLoginId(savedToken.getLoginId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        String newAccessToken = jwtUtil.createToken(user.getUserId(), user.getLoginId());
+
+        // Refresh Token은 그대로 유지하고 Access Token만 갱신해서 반환
+        return new TokenResponseDTO(newAccessToken, refreshToken);
     }
 }
