@@ -48,7 +48,7 @@ public class Seat {
     }
 
     // 좌석 상태 변경
-    public void holdSet() {
+    public void holdSeat() {
         if (!this.seatStatus.equals("AVAILABLE")) {
             throw new IllegalStateException("이미 선점되거나 예매된 자석입니다.");
         }
