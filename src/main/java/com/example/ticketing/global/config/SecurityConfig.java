@@ -29,20 +29,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 무의미한 CSRF 보호 기능을 끔
                 .csrf(csrf -> csrf.disable())
-                // 스프링 시큐리티가 세션을 생성하지도 사용하지도 않게 막음 -> JWT 사용 예정
                 .sessionManagement(
                         session -> session
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 기본 로그인 폼 화면과 HTTP Basic 인증 끔
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
-                // API 경로 별 접근 권한 설정
+
+                // 💡 API 경로 별 접근 권한 설정 (이 부분 수정!)
                 .authorizeHttpRequests(auth -> auth
-                        // 누구나 접근 가능
+                        // 🌟 프론트엔드 HTML 화면과 기본 주소를 누구나 볼 수 있게 허용합니다.
+                        .requestMatchers("/", "/index.html", "/favicon.ico", "/error").permitAll()
+
+                        // 기존 API 누구나 접근 가능
                         .requestMatchers("/api/v1/users/signup", "/api/v1/users/login",
                                 "/api/v1/performances/**", "/api/v1/users/refresh-token").permitAll()
+
                         // 반드시 인증을 거쳐야 접근 가능
                         .anyRequest().authenticated()
                 )

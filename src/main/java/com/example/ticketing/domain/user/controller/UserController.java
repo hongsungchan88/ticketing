@@ -1,8 +1,6 @@
 package com.example.ticketing.domain.user.controller;
 
-import com.example.ticketing.domain.user.dto.LoginRequestDTO;
-import com.example.ticketing.domain.user.dto.SignUpRequestDTO;
-import com.example.ticketing.domain.user.dto.TokenResponseDTO;
+import com.example.ticketing.domain.user.dto.*;
 import com.example.ticketing.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +45,29 @@ public class UserController {
         String refreshToken = request.get("refreshToken");
         TokenResponseDTO tokenResponse = userService.refreshToken(refreshToken);
         return ResponseEntity.ok(tokenResponse);
+    }
+
+    // 💡 1. 비밀번호 변경 API
+    @PatchMapping("/my/password")
+    public ResponseEntity<String> updatePassword(@RequestBody @Valid PasswordUpdateRequestDTO requestDTO, Authentication authentication) {
+        String loginId = authentication.getName(); // 토큰에서 ID 추출
+        userService.updatePassword(loginId, requestDTO);
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+    }
+
+    // 💡 2. 내 정보 수정 API
+    @PatchMapping("/my")
+    public ResponseEntity<String> updateUserInfo(@RequestBody UserInfoUpdateRequestDTO requestDTO, Authentication authentication) {
+        String loginId = authentication.getName();
+        userService.updateUserInfo(loginId, requestDTO);
+        return ResponseEntity.ok("내 정보가 성공적으로 변경되었습니다.");
+    }
+
+    // 💡 3. 회원 탈퇴 API
+    @DeleteMapping("/my")
+    public ResponseEntity<String> deleteUser(Authentication authentication) {
+        String loginId = authentication.getName();
+        userService.deleteUser(loginId);
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 }

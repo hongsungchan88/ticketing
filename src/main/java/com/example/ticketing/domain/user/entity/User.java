@@ -35,4 +35,15 @@ public class User {
         this.userName = userName;
         this.email = email;
     }
+
+    // 💡 비밀번호 변경 메서드
+    public void updatePassword(String encodedNewPw) {
+        this.pw = encodedNewPw;
+    }
+
+    // 💡 내 정보(이름, 이메일) 변경 메서드
+    public void updateInfo(String userName, String email) {
+        this.userName = userName;
+        this.email = email;
+    }
 }

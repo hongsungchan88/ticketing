@@ -1,8 +1,6 @@
 package com.example.ticketing.domain.user.service;
 
-import com.example.ticketing.domain.user.dto.LoginRequestDTO;
-import com.example.ticketing.domain.user.dto.SignUpRequestDTO;
-import com.example.ticketing.domain.user.dto.TokenResponseDTO;
+import com.example.ticketing.domain.user.dto.*;
 import com.example.ticketing.domain.user.entity.RefreshToken;
 import com.example.ticketing.domain.user.entity.User;
 import com.example.ticketing.domain.user.repository.RefreshTokenRepository;
@@ -87,5 +85,42 @@ public class UserService {
 
         // Refresh Token은 그대로 유지하고 Access Token만 갱신해서 반환
         return new TokenResponseDTO(newAccessToken, refreshToken);
+    }
+
+    // 💡 1. 비밀번호 변경
+    @Transactional
+    public void updatePassword(String loginId, PasswordUpdateRequestDTO requestDTO) {
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // 기존 비밀번호가 맞는지 검증
+        if (!passwordEncoder.matches(requestDTO.getOldPw(), user.getPw())) {
+            throw new IllegalArgumentException("기존 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호 암호화 후 변경
+        user.updatePassword(passwordEncoder.encode(requestDTO.getNewPw()));
+    }
+
+    // 💡 2. 내 정보 수정
+    @Transactional
+    public void updateUserInfo(String loginId, UserInfoUpdateRequestDTO requestDTO) {
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        user.updateInfo(requestDTO.getUserName(), requestDTO.getEmail());
+    }
+
+    // 💡 3. 회원 탈퇴
+    @Transactional
+    public void deleteUser(String loginId) {
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        // (선택) 회원 탈퇴 시 가지고 있던 Refresh Token도 함께 삭제
+        refreshTokenRepository.deleteByLoginId(loginId);
+
+        // DB에서 회원 삭제
+        userRepository.delete(user);
     }
 }

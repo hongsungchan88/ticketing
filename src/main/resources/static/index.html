@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>티켓팅 시스템 테스트</title>
+    <style>
+        body {
+            font-family: '맑은 고딕', sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 좌석 바둑판 스타일 */
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .seat {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+
+        .seat:hover {
+            background-color: #d0d0d0;
+        }
+
+        .seat.held {
+            background-color: #ffcccc;
+            color: #cc0000;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🎫 티켓팅 시스템 테스트 화면</h2>
+
+    <div id="login-section">
+        <h3>로그인</h3>
+        <input type="text" id="loginId" placeholder="아이디 (예: pwtest2)">
+        <input type="password" id="pw" placeholder="비밀번호">
+        <button onclick="login()">로그인</button>
+    </div>
+
+    <div id="booking-section" class="hidden">
+        <h3 id="user-greeting" style="color: #4CAF50;"></h3>
+        <button onclick="logout()" style="background-color: #ff4c4c;">로그아웃</button>
+
+        <hr>
+        <h3>스테이지 (좌석 선택)</h3>
+        <p>원하는 좌석을 클릭하면 JWT 토큰과 함께 예매 API가 호출됩니다.</p>
+        <div class="seat-grid" id="seat-grid">
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_BASE = '/api/v1';
+
+    // 💡 1. 로그인 API 호출 로직
+    async function login() {
+        const loginId = document.getElementById('loginId').value;
+        const pw = document.getElementById('pw').value;
+
+        try {
+            const response = await fetch(`${API_BASE}/users/login`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({loginId, pw})
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // 발급받은 JWT 토큰을 브라우저 저장소(localStorage)에 보관합니다! (프론트엔드 핵심)
+                localStorage.setItem('accessToken', data.accessToken);
+
+                alert('로그인 성공!');
+                showBookingSection(loginId);
+            } else {
+                alert('로그인 실패! 아이디나 비밀번호를 확인하세요.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // 💡 2. 예매 API 호출 로직
+    async function bookSeat(seatId) {
+        // 브라우저 저장소에서 보관해둔 출입증(토큰)을 꺼냅니다.
+        const token = localStorage.getItem('accessToken');
+        if (!token) {
+            alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/bookings`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // 🌟 핵심: 요청 헤더에 토큰을 실어 보냅니다.
+                },
+                body: JSON.stringify({
+                    seatId: seatId,
+                    version: 1 // 테스트를 위해 version 1로 고정
+                })
+            });
+
+            if (response.status === 201) {
+                alert(`${seatId}번 좌석 예매 성공! 🎉\n(5분 뒤 스케줄러에 의해 자동 취소 로그가 찍히는지 확인해보세요!)`);
+                // 예매 성공 시 해당 좌석의 색상을 붉은색(held)으로 바꿉니다.
+                document.getElementById(`seat-${seatId}`).classList.add('held');
+            } else {
+                const err = await response.text();
+                alert(`예매 실패: 다른 사람이 먼저 선점했거나 오류가 발생했습니다.`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // --- 아래는 화면 전환 및 좌석 렌더링용 보조 함수입니다 ---
+
+    function showBookingSection(loginId) {
+        document.getElementById('login-section').classList.add('hidden');
+        document.getElementById('booking-section').classList.remove('hidden');
+        document.getElementById('user-greeting').innerText = `${loginId}님, 환영합니다!`;
+        renderSeats();
+    }
+
+    function logout() {
+        localStorage.removeItem('accessToken'); // 토큰 파기
+        location.reload(); // 화면 새로고침
+    }
+
+    function renderSeats() {
+        const grid = document.getElementById('seat-grid');
+        grid.innerHTML = ''; // 초기화
+
+        // 1번부터 10번까지의 좌석 버튼을 바둑판으로 생성합니다.
+        for (let i = 1; i <= 10; i++) {
+            const seat = document.createElement('div');
+            seat.id = `seat-${i}`;
+            seat.className = 'seat';
+            seat.innerText = `${i}번`;
+            seat.onclick = () => bookSeat(i);
+            grid.appendChild(seat);
+        }
+    }
+</script>
+</body>
+</html>
