@@ -18,7 +18,7 @@ spring:
       # 변경사항만 반영
       ddl-auto: update # 개발
     # SQL 로그 출력
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         highlight_sql: true # SQL 키워드 하이라이트 표시

@@ -36,6 +36,8 @@ public class BookingService {
         }
 
         seat.holdSeat();
+        // 좌석 UPDATE(버전 검사 + 배타 락)를 bookings INSERT보다 먼저 실행: INSERT의 FK 공유 락과 엇갈려 생기는 데드락 방지
+        seatRepository.saveAndFlush(seat);
 
         Booking booking = Booking.builder()
                 .bookStatus("INITIATED")
