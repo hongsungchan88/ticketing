@@ -34,7 +34,7 @@ public class BookingScheduler {
 
         for (Booking booking : targetBookings) {
             booking.cancelBooking(); // 예매 내역 취소 처리
-            booking.getSeat().reserveSeat(); // 좌석 상태 원상 복구
+            booking.getSeat().releaseSeat(); // 좌석 상태 원상 복구 (HELD -> AVAILABLE)
             log.info("예매 자동 취소 완료 - 예매 번호 : {}, 좌석 번호 : {}", booking.getBookId(), booking.getSeat().getSeatId());
         }
     }
