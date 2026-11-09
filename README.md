@@ -7,7 +7,7 @@
 좌석 중복 예매를 막는 **동시성 제어**, 미결제 좌석을 되돌리는 **자동 취소 스케줄러**, 무상태(Stateless) **JWT 인증**을 구현했습니다.
 
 ## 🛠 기술 스택
-* **Backend:** Java 21, Spring Boot 4.0.5, Spring Data JPA, Spring Security
+* **Backend:** Java 21, Spring Boot 4.0.9, Spring Data JPA, Spring Security
 * **Database:** MySQL (테스트: H2 인메모리)
 * **Authentication:** JWT (jjwt 0.11.5)
 * **Testing:** JUnit 5, Mockito, Apache JMeter, Postman
