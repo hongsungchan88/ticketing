@@ -32,6 +32,12 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
+    // 로그인 연속 실패로 잠긴 계정
+    @ExceptionHandler(LoginLockedException.class)
+    public ResponseEntity<ErrorResponse> handleLoginLocked(LoginLockedException e) {
+        return build(HttpStatus.TOO_MANY_REQUESTS, e.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> build(HttpStatus status, String message) {
         return ResponseEntity.status(status).body(new ErrorResponse(status.name(), message));
     }

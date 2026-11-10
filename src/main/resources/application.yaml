@@ -32,4 +32,4 @@ logging:
     com.example.ticketing: DEBUG
 # JWT 설정 추가
 jwt:
-  secret: a-very-secure-secret-key-for-ticketing-system-which-is-long-enough
+  secret: ${JWT_SECRET} # 32바이트 이상, 저장소에 커밋하지 않음

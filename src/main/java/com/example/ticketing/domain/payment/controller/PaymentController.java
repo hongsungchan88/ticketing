@@ -5,6 +5,7 @@ import com.example.ticketing.domain.payment.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +20,10 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/payments")
-    public ResponseEntity<Long> processPayment(@RequestBody PaymentRequestDTO requestDTO) {
+    public ResponseEntity<Long> processPayment(@RequestBody PaymentRequestDTO requestDTO, Authentication authentication) {
         log.info("결제 처리 요청 - 예매 번호 : {}, 금액 : {}", requestDTO.getBookId(), requestDTO.getAmount());
 
-        Long payId = paymentService.processPayment(requestDTO);
+        Long payId = paymentService.processPayment(requestDTO, authentication.getName());
 
         log.info("결제 및 예매 확정 완료 - 결제 번호 : {}", payId);
         return ResponseEntity.ok(payId);

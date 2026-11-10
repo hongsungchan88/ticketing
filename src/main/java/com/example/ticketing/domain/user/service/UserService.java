@@ -18,6 +18,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final LoginAttemptService loginAttemptService;
 
     @Transactional
     public void signUp(SignUpRequestDTO requestDTO) {
@@ -39,12 +40,16 @@ public class UserService {
 
     @Transactional
     public TokenResponseDTO login(LoginRequestDTO requestDTO) {
-        User user = userRepository.findByLoginId(requestDTO.getLoginId())
-                .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 ID입니다."));
+        String loginId = requestDTO.getLoginId();
+        loginAttemptService.checkLocked(loginId);
 
-        if (!passwordEncoder.matches(requestDTO.getPw(), user.getPw())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        // 없는 ID와 틀린 비밀번호를 같은 메시지로 응답해 가입된 ID를 알아낼 수 없게 함
+        User user = userRepository.findByLoginId(loginId).orElse(null);
+        if (user == null || !passwordEncoder.matches(requestDTO.getPw(), user.getPw())) {
+            loginAttemptService.recordFailure(loginId);
+            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
+        loginAttemptService.recordSuccess(loginId);
 
         // 1. 두 개의 토큰 생성
         String accessToken = jwtUtil.createToken(user.getUserId(), user.getLoginId());

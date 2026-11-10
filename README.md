@@ -60,6 +60,12 @@
 * **원인:** 스케줄러가 `releaseSeat()`가 아니라 `reserveSeat()`를 호출해 좌석이 `HELD → RESERVED`(판매 완료)로 바뀜.
 * **해결:** `releaseSeat()`(→ `AVAILABLE`)로 수정. `BookingSchedulerTest`로 예매 `CANCELLED`, 좌석 `AVAILABLE`을 검증.
 
+### (4) 보안 점검 후 수정한 설계 문제
+* **JWT 비밀키가 설정 파일에 그대로 커밋돼 있던 문제:** 저장소를 본 사람은 누구나 토큰을 위조할 수 있음. 비밀키를 환경변수 `JWT_SECRET`으로 옮기고 키를 새로 발급함.
+* **다른 사람의 예매 번호로 결제할 수 있던 문제(IDOR):** 결제 API가 예매 번호만 받고 예매한 사람이 맞는지 확인하지 않았음. 토큰의 로그인 ID와 예매자를 비교해 다르면 "존재하지 않는 예매"로 응답(남의 예매가 있는지도 알 수 없게 함). `PaymentServiceTest`로 검증.
+* **로그인 시도 횟수 제한이 없던 문제:** 비밀번호를 무한히 대입할 수 있었음. 같은 ID로 5회 연속 실패하면 10분 동안 `429 Too Many Requests`로 막고, 없는 ID와 틀린 비밀번호를 같은 메시지로 응답하게 바꿈. `LoginAttemptServiceTest`로 검증.
+  * 실패 기록은 서버 메모리에 저장하므로 서버를 여러 대로 늘리면 DB나 Redis로 옮겨야 함.
+
 ---
 
 ## 📊 부하 테스트 결과 (JMeter, 같은 좌석 동시 예매 1,000 스레드)
@@ -99,6 +105,6 @@
 
 ## 👨‍💻 프로젝트 실행 방법
 1. MySQL에 `ticketing_db` 데이터베이스를 생성합니다.
-2. 환경변수 `DB_USERNAME`, `DB_PASSWORD`를 설정합니다.
+2. 환경변수 `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`(32바이트 이상 임의 문자열)을 설정합니다.
 3. 애플리케이션을 실행한 후 `http://localhost:8080`에 접속하면 HTML UI로 기능을 테스트할 수 있습니다.
 4. 테스트는 H2 인메모리 DB로 실행되므로 MySQL 없이 `./gradlew test`로 돌릴 수 있습니다.

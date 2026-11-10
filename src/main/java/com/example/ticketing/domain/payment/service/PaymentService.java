@@ -19,10 +19,15 @@ public class PaymentService {
     private final BookingRepository bookingRepository;
 
     @Transactional
-    public Long processPayment(PaymentRequestDTO requestDTO) {
+    public Long processPayment(PaymentRequestDTO requestDTO, String loginId) {
         // 예매 내역 조회
         Booking booking = bookingRepository.findById(requestDTO.getBookId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예매 내역입니다."));
+
+        // 다른 사람의 예매 번호로 결제하지 못하게 막음. 남의 예매가 있는지도 알 수 없게 같은 메시지로 응답
+        if (!booking.getUser().getLoginId().equals(loginId)) {
+            throw new IllegalArgumentException("존재하지 않는 예매 내역입니다.");
+        }
 
         // 금액 검증
         if (!booking.getSeat().getPrice().equals(requestDTO.getAmount())) {
